@@ -47,6 +47,12 @@ function default_1(options) {
                 bufnr
             });
         }
+        else if (method === 'buffer_changed') {
+            // Handle buffer change event from Vim
+            if (app.notifyBufferChange) {
+                app.notifyBufferChange(opts);
+            }
+        }
     }));
     nvim.on('request', (method, args, resp) => {
         if (method === 'close_all_pages') {

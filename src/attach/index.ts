@@ -3,23 +3,19 @@ import { attach, Attach, NeovimClient } from '@chemzqm/neovim'
 const logger = require('../util/logger')('attach') // tslint:disable-line
 
 interface IApp {
-  refreshPage: ((
-    param: {
-      bufnr: number | string
-      data: any
-    }
-  ) => void)
-  closePage: ((
-    params: {
-      bufnr: number | string
-    }
-  ) => void)
+  refreshPage: ((param: {
+    bufnr: number | string
+    data: any
+  }) => void)
+  closePage: ((params: {
+    bufnr: number | string
+  }) => void)
   closeAllPages: (() => void)
-  openBrowser: ((
-    params: {
-      bufnr: number | string
-    }
-  ) => void)
+  openBrowser: ((params: {
+    bufnr: number | string
+  }) => void)
+  notifyBufferChange?: ((payload: any) => void)
+  notifyWikilinkClick?: ((data: any) => void)
 }
 
 interface IPlugin {
@@ -37,6 +33,7 @@ export default function(options: Attach): IPlugin {
     const bufnr = opts.bufnr
     const buffers = await nvim.buffers
     const buffer = buffers.find(b => b.id === bufnr)
+    
     if (method === 'refresh_content') {
       const winline = await nvim.call('winline')
       const currentWindow = await nvim.window
@@ -70,6 +67,11 @@ export default function(options: Attach): IPlugin {
       app.openBrowser({
         bufnr
       })
+    } else if (method === 'buffer_changed') {
+      // Handle buffer change event from Vim
+      if (app.notifyBufferChange) {
+        app.notifyBufferChange(opts)
+      }
     }
   })
 
